@@ -260,6 +260,34 @@
                 return this;
             }
         },
+        runTo: function (val) {
+            if (this._isRunning) {
+                throw '[Error]: Tolito is already running.';
+            } else if (this._indefinite) {
+                throw '[Error]: Tolito is indefinite.';
+            } else {
+                (function loop(instance) {
+                    instance.fillProgressBar = setTimeout((function (inst) {
+                        return function () {
+                            var thisValue = $(['#', inst.getId()].join(""))
+                                .progressbar('option', 'value'),
+                                counter = !isNaN(thisValue) ? (thisValue + 1) : 1;
+                            if (counter > val) {
+                                clearTimeout(inst.fillProgressBar);
+                            } else {
+                                $(['#', inst.getId()].join(""))
+                                    .progressbar({
+                                        value: counter
+                                    });
+                                loop(inst);
+                            }
+                        }
+                    })(instance), instance.getInterval());
+                })(this);
+                this._isRunning = true;
+                return this;
+            }
+        },
         stop: function () {
             if (!this._isRunning) {
                 throw '[Error]: Tolito is already stopped.';
